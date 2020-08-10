@@ -33,17 +33,15 @@ makeBytesPattern s = do
   true = (ConP (mkName "True") [])
   x :: Name
   x = mkName "x"
-  {-# INLINE (&&&) #-}
-  (&&&) :: Exp -> Exp -> Exp
-  a &&& b = (VarE '(&&)) `AppE` ParensE a `AppE` ParensE b
+
   bytes@(BytesT.Bytes _ _ len) = Bytes.fromLatinString s
   expr :: Exp
   expr = LamE [VarP x] $ 
-        (        (ParensE $ VarE '(==) `AppE` (LitE $ IntegerL $ fromIntegral len))
-          `AppE` (ParensE $ VarE 'Bytes.length `AppE` VarE x)
+        (     (ParensE $ (LitE $ IntegerL $ fromIntegral len))
+          === (ParensE $ VarE 'Bytes.length `AppE` VarE x)
         )
-    &&& (        (ParensE $ VarE '(==) `AppE` (LitE $ IntegerL $ fromIntegral $ Bytes.fnv1a64 bytes))
-          `AppE` (ParensE $ VarE 'Bytes.fnv1a64 `AppE` VarE x) 
+    &&& (     (ParensE $ (LitE $ IntegerL $ fromIntegral $ Bytes.fnv1a64 bytes))
+          === (ParensE $ VarE 'Bytes.fnv1a64 `AppE` VarE x) 
         )
     &&& ParensE ((equalsN len s) `AppE` VarE x)
 
@@ -71,3 +69,16 @@ c2w :: Char -> Word8
 c2w = fromIntegral . ord
 {-# INLINE c2w #-}
 
+{-# INLINE (&&&) #-}
+(&&&) :: Exp -> Exp -> Exp
+a &&& b = InfixE
+  (Just $ ParensE a)
+  (VarE '(&&))
+  (Just $ ParensE b)
+
+{-# INLINE (===) #-}
+(===) :: Exp -> Exp -> Exp
+a === b = InfixE
+  (Just $ ParensE a)
+  (VarE '(==))
+  (Just $ ParensE b)
