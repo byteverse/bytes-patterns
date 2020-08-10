@@ -10,7 +10,7 @@ module Data.Bytes.Patterns
 
 import Language.Haskell.TH
 import Data.Word (Word8)
-import Data.Char (ord, toUpper)
+import Data.Char (ord, toUpper, toLower)
 import GHC.Exts (Ptr(Ptr))
 import Data.Foldable
 import qualified Data.Bytes as Bytes
@@ -24,19 +24,20 @@ makeBytesPatterns bs = do
 makeBytesPattern :: String -> Q [Dec]
 makeBytesPattern s = do
   name <- newName $ (toUpper $ head s) : tail s
+  fnName <- newName $ ((toLower $ head s) : tail s) <> "Pattern"
   pure $ 
-    [ PatSynSigD name (ConT ''Bytes.Bytes)
-    , PatSynD name (PrefixPatSyn []) Unidir $ ViewP expr true
+    [ PragmaD $ InlineP fnName Inline FunLike AllPhases
+    , SigD fnName $ ArrowT `AppT` ConT ''Bytes.Bytes `AppT` ConT ''Bool
+    , FunD fnName [Clause [VarP x] (NormalB expr) []]
+    , PatSynSigD name (ConT ''Bytes.Bytes)
+    , PatSynD name (PrefixPatSyn []) Unidir $ ViewP (VarE fnName) (ConP 'True [])
     ]
   where
-  true :: Pat
-  true = (ConP (mkName "True") [])
   x :: Name
   x = mkName "x"
-
   bytes@(BytesT.Bytes _ _ len) = Bytes.fromLatinString s
   expr :: Exp
-  expr = LamE [VarP x] $ 
+  expr = 
         (     (ParensE $ (LitE $ IntegerL $ fromIntegral len))
           === (ParensE $ VarE 'Bytes.length `AppE` VarE x)
         )
