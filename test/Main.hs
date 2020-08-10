@@ -1,8 +1,7 @@
 {-# LANGUAGE 
     MagicHash 
   , TemplateHaskell
-  , PatternSynonyms
-  , ViewPatterns
+  , MultiWayIf
 #-}
 
 module Main where
@@ -32,33 +31,15 @@ tests = testGroup "Tests" [unitTests]
 
 unitTests :: TestTree
 unitTests = testGroup "Unit tests"
-  [ testCase "f" $ case fromAsciiString "f" of
-      F -> pure ()
-      _ -> assertFailure "f"
-  , testCase "fo" $ case fromAsciiString "fo" of
-      Fo -> pure ()
-      _ -> assertFailure "fo"
-  , testCase "foo" $ case fromAsciiString "foo" of
-      Foo -> pure ()
-      _ -> assertFailure "foo"
-  , testCase "foob" $ case fromAsciiString "foob" of
-      Foob -> pure ()
-      _ -> assertFailure "foob"
-  , testCase "fooba" $ case fromAsciiString "fooba" of
-      Fooba -> pure ()
-      _ -> assertFailure "fooba"
-  , testCase "foobar" $ case fromAsciiString "foobar" of
-      Foobar -> pure ()
-      _ -> assertFailure "foobar"
-  , testCase "foobarb" $ case fromAsciiString "foobarb" of
-      Foobarb -> pure ()
-      _ -> assertFailure "foobarb"
-  , testCase "foobarba" $ case fromAsciiString "foobarba" of
-      Foobarba -> pure ()
-      _ -> assertFailure "foobarba"
-  , testCase "foobarbaz" $ case fromAsciiString "foobarbaz" of
-      Foobarbaz -> pure ()
-      _ -> assertFailure "foobarbaz"
+  [ assertBoolTest "f"         $ isF         $ fromAsciiString "f"
+  , assertBoolTest "fo"        $ isFo        $ fromAsciiString "fo"
+  , assertBoolTest "foo"       $ isFoo       $ fromAsciiString "foo"
+  , assertBoolTest "foob"      $ isFoob      $ fromAsciiString "foob"
+  , assertBoolTest "fooba"     $ isFooba     $ fromAsciiString "fooba"
+  , assertBoolTest "foobar"    $ isFoobar    $ fromAsciiString "foobar"
+  , assertBoolTest "foobarb"   $ isFoobarb   $ fromAsciiString "foobarb"
+  , assertBoolTest "foobarba"  $ isFoobarba  $ fromAsciiString "foobarba"
+  , assertBoolTest "foobarbaz" $ isFoobarbaz $ fromAsciiString "foobarbaz"
   ]
-
-
+  where
+  assertBoolTest x b = testCase x $ assertBool x b
