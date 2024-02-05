@@ -2,7 +2,7 @@ cabal-version:   2.4
 name:            bytes-patterns
 version:         0.1.0.0
 synopsis:        Template haskell macro for casing on Bytes
-description:     DESCRIPTION NEEDED
+description:     Provides template haskell macros for casing on Bytes
 homepage:        https://github.com/byteverse/bytes-patterns
 bug-reports:     https://github.com/byteverse/bytes-patterns/issues
 license:         MIT
